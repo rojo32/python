@@ -1,0 +1,33 @@
+# Archivos y carpetas de Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Entorno virtual
+venv/
+env/
+entorno_virtual/
+
+# Configuración de IDEs (VSCode, PyCharm, etc.)
+.vscode/
+.idea/
+
+# Archivos de configuración de Django
+#db.sqlite3
+#*.sqlite3
+
+# Archivos de migración de Django
+**/migrations/
+
+# Archivos estáticos y de media (si los manejas de manera local)
+
+
+# Archivos de log y de entorno
+*.log
+*.env
+
+# Archivos temporales
+#*.bak
+*.tmp
+*.swp
