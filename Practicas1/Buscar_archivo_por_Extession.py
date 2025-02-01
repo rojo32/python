@@ -19,12 +19,12 @@ ruta = input('Ingrese la ruta del directorio a realizar la búsqueda: ')
 extension = input('Ingrese la extesión que deseas ingresar (ejemplo .pdf): ')
 
 # Busca los archivos .mp3 en la ruta proporcionada
-archivos_mp3 = buscar_archivos(ruta,extension)
+archivos= buscar_archivos(ruta,extension)
 
 # Muestra los resultados
-if archivos_mp3:
+if archivos:
     print(f"Se encontraron los siguientes archivos con la extesión {extension}:")
-    for archivo in archivos_mp3:
+    for archivo in archivos:
         print(f' -> {archivo}')
 else:
     print("No se encontraron archivos .mp3 en la ruta proporcionada.")
