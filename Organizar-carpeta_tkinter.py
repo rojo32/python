@@ -12,6 +12,7 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 import os
+from tkinter import Tk, filedialog
 
 def Crear_Organizar_Carpeta(ruta):
     """se crea las carpetas para organizar los archivos"""
@@ -29,7 +30,7 @@ def Crear_Organizar_Carpeta(ruta):
     # se valida la ruta de las carpeta
     for carpeta in carpetas:
         ruta_carpeta=os.path.join(ruta, carpeta)
-        print(f'ruta carpta {ruta_carpeta}')
+       
         if not os.path.exists(ruta_carpeta):
             os.makedirs(ruta_carpeta)
             print(f'se crea la ruta sino existe{ruta_carpeta}')
@@ -44,72 +45,82 @@ def obtener_carpeta_por_extension(extension, diccionario_carpeta):
         
     return 'otros'
 
+# valida 
+
+        
+    
+       
+    
+    
+    
+        
+
 def organizar_archivos(directorio):
     #organiza los archivos en la carpeta
     try:
-        #Crear el registro de movimiento
-        log=[]
+        #Crear el registro de movimiento   
+        
+        contador=0 # para controlar si hubo archivo en en el directorio
         
         #obtener ruta absoluta
         directorio=os.path.abspath(directorio)
-        print(f'el directorio es {directorio}')
         
         #crear carpeta de organización
         carpetas=Crear_Organizar_Carpeta(directorio)
-        print(f'se crea la carpeta {carpetas}')
-        
-        #recorrer archivos en el directorio
+               
+      
+        log_filename=os.path.join(directorio,"log_organizacion.txt")
+           
         
         for archivo in os.listdir(directorio):
             ruta_archivos=os.path.join(directorio, archivo)
-            
+                
             #ignorar carpetas y archivos ocultos
-            if os.path.isfile(ruta_archivos) and not ruta_archivos.startswith('.'):
+            if os.path.isfile(ruta_archivos) and not ruta_archivos.startswith('.') and ruta_archivos != log_filename :
                 #obtener extesion
                 extension=os.path.splitext(archivo)[1] # archivo.pdf lo que hace es separar |archivo|pdf|
                 
+                    
                 #determinar carpeta destino
                 carpeta_destino=obtener_carpeta_por_extension(extension,carpetas)
                 destino_carpeta=os.path.join(directorio, carpeta_destino,archivo)
-                
+                print(destino_carpeta)
+                    
                 #mover archivos
                 try:
                     shutil.move(ruta_archivos, destino_carpeta)
-                    log.append(f'movido {archivo}-->{destino_carpeta}/')
+                    with open(log_filename, 'a', encoding='utf-8') as log_file:
+                        log_file.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Movido: {archivo} --> {destino_carpeta}/\n ")
+                        contador+=1
                 except Exception as e:
-                    log.append(f' error al mover  {archivo}:{str(e)}')
-        #generar log
-        if log:
-            print("\n== reporte de organización===")
-            print(f"Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            print(f"Directorio: {directorio}")
-            print("\Movimientos realizados")
-            for entrar in log:
-                print(f"-{entrar}")
-        else:
+                    print(f' error al mover  {archivo}:{str(e)}')
+                    
+                              
+                  
+                
+        if contador < 1:
             print("No se encontraron archivos para organizar")
+            with open(log_filename, 'a', encoding='utf-8') as log_file:
+                log_file.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - no se encontraron archivos para organizar en {directorio}/\n ")              
             
+                
     except Exception as e:
-        print(f"Error durante la organización: {str(e)}")
+        pass         
         
-if __name__=="__main__":
-    #solicitar directorio a organizar
-    directorio=input("Ingrese la ruta del directorio a organizar (Enter para directorio actual) ")
-    
-    #Si no se especifica directorio, usar el actual
-    if not directorio:
-        directorio="."
+
         
-    #verificar que el directorio existe
-    if not os.path.exists(directorio):
-        print("Error: El directorio especificado no existe.")
-        exit(1)
-        
-    #confirmar acción
-    print(f'\nSe organizaran los archivos en: {os.path.abspath(directorio)}')
-    confirmacion=input("¿Desea continuar? (S/N):")
-    if confirmacion.lower():
-        organizar_archivos(directorio)
+ventana=Tk()
+ventana.withdraw()# para evitar que aparezca la venta de shell o simbolo del sistema (sistema operativo windows)
+
+ruta=filedialog.askdirectory(title="Seleccine la carpeta a ordener")# permite seleccionar la ruta del directorio
+
+#Crear_Organizar_Carpeta(ruta)
+organizar_archivos(ruta)
+print('proceso finalizado consulte el log')
+
+
+
+
         
     
             
