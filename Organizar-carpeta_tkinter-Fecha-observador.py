@@ -9,10 +9,22 @@ Permite organizar los archivos según su extesión, crea subcarpeta y se queda e
 """
 
 import shutil
+import threading
 from pathlib import Path
 from datetime import datetime
 import os
-from tkinter import Tk, filedialog
+import time
+from tkinter import Tk, filedialog,Button,Label
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
+
+class ManejadorEventos(FileSystemEventHandler):
+    def on_modified(self, event):
+        if event.is_directory or event.src_path.endswith('.py') or event.src_path.endswith('.log'):
+            print(f'nuevo archivo detectado {event.src_path}')
+            organizar_archivos(ruta)
+                
 
 def Crear_Organizar_Carpeta(ruta):
     """se crea las carpetas para organizar los archivos"""
@@ -25,6 +37,12 @@ def Crear_Organizar_Carpeta(ruta):
         'comprimidos':['.zip','.rar','.7z'],
         'otros':[]
         }
+    
+    #creamos la carpeta de log, donde se va almacenar el log
+    log=os.path.join(ruta, "log")
+    print(f'ruta log {log}')
+    if not os.path.exists(log):
+        os.makedirs(log)        
    
     
     # se valida la ruta de las carpeta
@@ -43,8 +61,7 @@ def obtener_carpeta_por_extension(extension, diccionario_carpeta):
         if extension.lower() in extensiones:
             return carpeta
         
-    return 'otros'
-        
+    return 'otros'      
 
     
     
@@ -61,9 +78,10 @@ def organizar_archivos(directorio):
         
         #crear carpeta de organización
         carpetas=Crear_Organizar_Carpeta(directorio)
+        log=os.path.join(directorio, "log")#ruta log
                
       
-        log_filename=os.path.join(directorio,"log_organizacion.txt")
+        log_filename=os.path.join(log,"log_organizacion.txt")
            
         
         for archivo in os.listdir(directorio):
@@ -71,7 +89,7 @@ def organizar_archivos(directorio):
             
                 
             #ignorar carpetas y archivos ocultos
-            if os.path.isfile(ruta_archivos) and not ruta_archivos.startswith('.') and ruta_archivos != log_filename :
+            if os.path.isfile(ruta_archivos) and not ruta_archivos.startswith('.') :
                 #obtener extesion
                 extension=os.path.splitext(archivo)[1] # archivo.pdf lo que hace es separar |archivo|pdf|
                 
@@ -122,3 +140,53 @@ ruta=filedialog.askdirectory(title="Seleccine la carpeta a ordener")# permite se
 #Crear_Organizar_Carpeta(ruta)
 organizar_archivos(ruta)
 print('proceso finalizado consulte el log')
+
+ManejadorEventos=ManejadorEventos()
+observer=Observer()
+observer.schedule(ManejadorEventos,ruta,recursive=False)# se coloca Fase para que orden por carpeta y omita la subcarpeta
+#observer.start() # crea un Thread de forma automatica que va a vigilar de forma automatica la ruta.
+""" 
+print(f'vigilando la carpeta {ruta}')
+print(f'presione CTRL + C para detener la ejecucion')
+
+# Para que el programa puede seguir funcionando, es necesario un bucle infinito, mientra hace la vigilacia
+try:
+    while True:
+        #pass
+        time.sleep(1)
+except KeyboardInterrupt: #permite interumpir la ejecucion con CTRL + C
+    observer.stop()
+    print('Detencio detenido')
+observer.join() #asegura que el hilo de vigilacia no se interumpa abruptamente, con CTRL + C
+"""
+
+def iniciar_vigilancia():
+    observer.start() 
+    
+def detener_vigilancia():
+    observer.stop()
+    observer.join()
+    ventana.quit()
+   
+    
+
+    
+ventana.deiconify()
+ventana.title('vigilancia de  carpeta')
+ventana.geometry('400x400')
+
+Label(ventana,text=f'vigilando la carpeta \n{ruta}',wraplength=350).pack(pady=10)
+#Button(ventana,text='iniciar vigilancia',command=iniciar_vigilancia).pack(pady=10)
+Button(ventana,text='detener vigilancia',command=detener_vigilancia).pack(pady=10)
+#Button(ventana,text='Salir',command=salir).pack(pady=10)
+
+hilo_vigilancia=threading.Thread(target=iniciar_vigilancia, daemon=True)
+hilo_vigilancia.start()
+
+
+ventana.mainloop()
+    
+
+    
+
+    
