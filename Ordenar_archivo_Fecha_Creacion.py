@@ -1,12 +1,13 @@
-from datetime import datetime
-import os
-import json
-import shutil
+from datetime import datetime # Manejo de fechas y timestamps
+import os # Operaciones del sistema de archivos
+import json # Serialización del log de operaciones
+import shutil # Movimiento de archivos entre directorios
 
+#Determina la fecha de última modificación de un archivo y crea (si no existe) una subcarpeta con el formato YYYY-MM dentro del directorio base.#
 def crear_carpeta(ruta_archivo, directorio_base):
     timestamp=os.path.getmtime(ruta_archivo)
     fecha=datetime.fromtimestamp(timestamp)
-    carpeta_destino = fecha.strftime("%Y-%m")
+    carpeta_destino = fecha.strftime("%Y-%m") #Nombre de la carpeta destino (ej. 2024-03)
     os.makedirs(os.path.join(directorio_base, carpeta_destino), exist_ok=True)
 
     return carpeta_destino
